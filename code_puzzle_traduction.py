@@ -1,4 +1,4 @@
-import tkinter as tk
+import streamlit as st
 
 # ==========================================
 # Classe Bloc avec hauteur automatique
@@ -73,15 +73,15 @@ class App:
         root.geometry("900x600")
 
         # frame principale
-        frame = tk.Frame(root)
+        frame = st.Frame(root)
         frame.pack(fill="both", expand=True)
 
         # canvas
-        self.canvas = tk.Canvas(frame, bg="white")
+        self.canvas = st.Canvas(frame, bg="white")
         self.canvas.pack(side="left", fill="both", expand=True)
 
         # scrollbar verticale
-        scrollbar = tk.Scrollbar(frame, orient="vertical", command=self.canvas.yview)
+        scrollbar = st.Scrollbar(frame, orient="vertical", command=self.canvas.yview)
         scrollbar.pack(side="right", fill="y")
 
         self.canvas.configure(yscrollcommand=scrollbar.set)
@@ -164,7 +164,7 @@ for codon in resultat:
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
         # bouton exécuter
-        bouton = tk.Button(root, text="Exécuter", command=self.executer)
+        bouton = st.Button(root, text="Exécuter", command=self.executer)
         bouton.pack(pady=5)
 
     # ==========================================
@@ -195,6 +195,6 @@ for codon in resultat:
 
 if __name__ == "__main__":
 
-    root = tk.Tk()
+    root = st.st()
     app = App(root)
     root.mainloop()
