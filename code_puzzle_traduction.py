@@ -1,4 +1,5 @@
 import streamlit as st
+st.title("Code puzzle traduction")
 
 # ==========================================
 # Classe Bloc avec hauteur automatique
@@ -195,6 +196,5 @@ for codon in resultat:
 
 if __name__ == "__main__":
 
-    root = st.st()
     app = App(root)
-    root.mainloop()
+
