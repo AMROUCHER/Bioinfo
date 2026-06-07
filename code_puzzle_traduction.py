@@ -7,16 +7,13 @@ st.set_page_config(
     page_icon="🧬"
 )
 
-
 st.title("🧬 Puzzle ADN → Protéine")
 
-st.write(
-    "Replace les blocs pour reconstruire le programme."
-)
+st.write("Déplace les blocs pour reconstruire le programme.")
 
 
 # =================================================
-# Blocs du programme
+# BLocs
 # =================================================
 
 blocs = [
@@ -24,10 +21,9 @@ blocs = [
 {
 "id":"C",
 "code":"""# Bloc C
-brin_ADN = input("Entrez la séquence ADN : ")
+brin_ADN = st.text_input("Entrez la séquence ADN :", "ATGGTTTAA")
 brin_ADN_propre = brin_ADN.upper()"""
 },
-
 
 {
 "id":"B",
@@ -35,19 +31,16 @@ brin_ADN_propre = brin_ADN.upper()"""
 brin_ARN = brin_ADN_propre.replace('T','U')"""
 },
 
-
 {
 "id":"A",
 "code":"""# Bloc A
 j = 0
-
 brin_ARN_propre = []
 
 while j < len(brin_ARN):
     brin_ARN_propre.append(brin_ARN[j:j+3])
     j += 3"""
 },
-
 
 {
 "id":"D",
@@ -61,7 +54,6 @@ code_genet = {
 'UGA':'STOP'
 }"""
 },
-
 
 {
 "id":"F",
@@ -95,17 +87,14 @@ def nettoyage(tab):
 
         j += 1
 
-
     return tab"""
 },
-
 
 {
 "id":"G",
 "code":"""# Bloc G
 resultat = nettoyage(brin_ARN_propre)"""
 },
-
 
 {
 "id":"E",
@@ -138,16 +127,14 @@ noms = [
     for b in blocs
 ]
 
-
 codes = {
-    "🧩 Bloc "+b["id"]: b["code"]
+    "🧩 Bloc " + b["id"]: b["code"]
     for b in blocs
 }
 
 
-
 # =================================================
-# Puzzle
+# PUZZLE
 # =================================================
 
 st.subheader("🧩 Déplace les blocs")
@@ -156,7 +143,6 @@ ordre = sort_items(
     noms,
     direction="vertical"
 )
-
 
 
 for bloc in ordre:
@@ -168,43 +154,50 @@ for bloc in ordre:
     else:
         apercu = "\n".join(lignes)
 
-    st.info(
-        bloc + "\n\n" + apercu
-    )
-
+    st.info(bloc + "\n\n" + apercu)
 
 
 # =================================================
-# Reconstruction
+# CODE RECONSTRUIT
 # =================================================
 
 st.divider()
 
 st.subheader("📜 Programme reconstruit")
 
-
 programme = ""
 
-
 for bloc in ordre:
+    programme += "\n\n" + codes[bloc]
 
-    programme += "\n\n"
-    programme += codes[bloc]
-
-
-st.code(
-    programme,
-    language="python"
-)
-
+st.code(programme, language="python")
 
 
 # =================================================
-# Vérification
+# EXÉCUTION RÉELLE
+# =================================================
+
+st.divider()
+
+st.subheader("🐍 Exécution du programme")
+
+if st.button("▶️ Lancer"):
+
+    try:
+        exec_globals = {"st": st}
+
+        exec(programme, exec_globals)
+
+    except Exception as e:
+
+        st.error(f"Erreur : {e}")
+
+
+# =================================================
+# VÉRIFICATION
 # =================================================
 
 solution = [
-
 "🧩 Bloc C",
 "🧩 Bloc B",
 "🧩 Bloc A",
@@ -212,90 +205,15 @@ solution = [
 "🧩 Bloc F",
 "🧩 Bloc G",
 "🧩 Bloc E"
-
 ]
 
 
 if st.button("✅ Vérifier"):
 
-
     if ordre == solution:
 
-
-        st.success(
-            "🎉 Bravo ! Le programme est correct."
-        )
-
-
-        st.subheader("🐍 Retour Python")
-
-
-        brin_ADN = "ATGGTTTAA"
-
-        brin_ADN_propre = brin_ADN.upper()
-
-        brin_ARN = brin_ADN_propre.replace(
-            "T","U"
-        )
-
-
-        brin_ARN_propre = []
-
-        for i in range(0,len(brin_ARN),3):
-
-            brin_ARN_propre.append(
-                brin_ARN[i:i+3]
-            )
-
-
-        code_genet = {
-
-            'AUG':'Met',
-            'UUU':'Phe',
-            'UUC':'Phe',
-            'UAA':'STOP',
-            'UAG':'STOP',
-            'UGA':'STOP'
-        }
-
-
-        proteine=[]
-
-
-        for codon in brin_ARN_propre:
-
-            if codon in code_genet:
-
-                if code_genet[codon]=="STOP":
-                    break
-
-                proteine.append(
-                    code_genet[codon]
-                )
-
-
-        st.code(
-            "Protéine correspondante :\n\n"
-            +
-            "-".join(proteine),
-            language="text"
-        )
-
+        st.success("🎉 Bravo ! Ordre correct.")
 
     else:
 
-
-        st.warning(
-            "⚠️ Ordre incorrect"
-        )
-
-
-        st.subheader(
-            "Ce que Python reçoit :"
-        )
-
-
-        st.code(
-            programme,
-            language="python"
-        )
+        st.warning("❌ Ordre incorrect, essaie encore.")
