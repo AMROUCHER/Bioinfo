@@ -11,7 +11,7 @@ st.set_page_config(
 st.title("🧬 Puzzle ADN → Protéine")
 
 st.write(
-    "Déplace les blocs pour reconstruire le programme."
+    "Replace les blocs pour reconstruire le programme."
 )
 
 
@@ -22,23 +22,61 @@ st.write(
 blocs = [
 
 {
-"id": "B",
-"code": """# Bloc B
-brin_ARN = brin_ADN_propre.replace('T', 'U')"""
+"id":"C",
+"code":"""# Bloc C
+brin_ADN = input("Entrez la séquence ADN : ")
+brin_ADN_propre = brin_ADN.upper()"""
 },
 
 
 {
-"id": "F",
-"code": """# Bloc F
+"id":"B",
+"code":"""# Bloc B
+brin_ARN = brin_ADN_propre.replace('T','U')"""
+},
+
+
+{
+"id":"A",
+"code":"""# Bloc A
+j = 0
+
+brin_ARN_propre = []
+
+while j < len(brin_ARN):
+    brin_ARN_propre.append(brin_ARN[j:j+3])
+    j += 3"""
+},
+
+
+{
+"id":"D",
+"code":"""# Bloc D
+code_genet = {
+'AUG':'Met',
+'UUU':'Phe',
+'UUC':'Phe',
+'UAA':'STOP',
+'UAG':'STOP',
+'UGA':'STOP'
+}"""
+},
+
+
+{
+"id":"F",
+"code":"""# Bloc F
 def nettoyage(tab):
 
     j = 0
 
     for i in tab:
-        if tab[j] == 'AUG':
+
+        if tab[j]=='AUG':
+
             for k in range(j):
                 del tab[0]
+
             break
 
         j += 1
@@ -47,82 +85,41 @@ def nettoyage(tab):
     j = 0
 
     for i in tab:
+
         if tab[j] in ['UAA','UAG','UGA']:
 
-            for k in range(j, len(tab)):
+            for k in range(j,len(tab)):
                 del tab[j]
 
             break
 
         j += 1
 
+
     return tab"""
 },
 
 
 {
-"id": "C",
-"code": """# Bloc C
-brin_ADN = input("Entrez la séquence ADN : ")
-
-brin_ADN_propre = brin_ADN.upper()"""
-},
-
-
-{
-"id": "D",
-"code": """# Bloc D
-code_genet = {
-    'AUG':'Met',
-    'UUU':'Phe',
-    'UUC':'Phe',
-    'UAA':'STOP',
-    'UAG':'STOP',
-    'UGA':'STOP'
-}"""
-},
-
-
-{
-"id": "A",
-"code": """# Bloc A
-j = 0
-
-brin_ARN_propre = []
-
-while j < len(brin_ARN):
-
-    brin_ARN_propre.append(
-        brin_ARN[j:j+3]
-    )
-
-    j += 3"""
-},
-
-
-{
-"id": "G",
-"code": """# Bloc G
+"id":"G",
+"code":"""# Bloc G
 resultat = nettoyage(brin_ARN_propre)"""
 },
 
 
 {
-"id": "E",
-"code": """# Bloc E
+"id":"E",
+"code":"""# Bloc E
 print("Protéine correspondante :")
 
 for codon in resultat:
 
     if codon in code_genet:
 
-        if code_genet[codon] == "STOP":
+        if code_genet[codon]=="STOP":
             break
 
-        print(
-            code_genet[codon],
-            end='-'
-        )
+        print(code_genet[codon], end='-')
 
     else:
         print("Erreur codon", codon)
@@ -143,17 +140,17 @@ noms = [
 
 
 codes = {
-    "🧩 Bloc " + b["id"]: b["code"]
+    "🧩 Bloc "+b["id"]: b["code"]
     for b in blocs
 }
 
 
+
 # =================================================
-# Puzzle déplacement
+# Puzzle
 # =================================================
 
-st.subheader("🧩 Replace les blocs")
-
+st.subheader("🧩 Déplace les blocs")
 
 ordre = sort_items(
     noms,
@@ -161,21 +158,24 @@ ordre = sort_items(
 )
 
 
-# affichage avec aperçu
 
 for bloc in ordre:
 
-    apercu = "\n".join(
-        codes[bloc].split("\n")[:3]
-    )
+    lignes = codes[bloc].split("\n")
+
+    if len(lignes) > 3:
+        apercu = "\n".join(lignes[:3]) + "\n..."
+    else:
+        apercu = "\n".join(lignes)
 
     st.info(
-        f"{bloc}\n\n{apercu}"
+        bloc + "\n\n" + apercu
     )
+
 
 
 # =================================================
-# Programme complet
+# Reconstruction
 # =================================================
 
 st.divider()
@@ -205,27 +205,97 @@ st.code(
 
 solution = [
 
-    "🧩 Bloc C",
-    "🧩 Bloc B",
-    "🧩 Bloc A",
-    "🧩 Bloc D",
-    "🧩 Bloc F",
-    "🧩 Bloc G",
-    "🧩 Bloc E"
+"🧩 Bloc C",
+"🧩 Bloc B",
+"🧩 Bloc A",
+"🧩 Bloc D",
+"🧩 Bloc F",
+"🧩 Bloc G",
+"🧩 Bloc E"
 
 ]
 
 
 if st.button("✅ Vérifier"):
 
+
     if ordre == solution:
+
 
         st.success(
             "🎉 Bravo ! Le programme est correct."
         )
 
+
+        st.subheader("🐍 Retour Python")
+
+
+        brin_ADN = "ATGGTTTAA"
+
+        brin_ADN_propre = brin_ADN.upper()
+
+        brin_ARN = brin_ADN_propre.replace(
+            "T","U"
+        )
+
+
+        brin_ARN_propre = []
+
+        for i in range(0,len(brin_ARN),3):
+
+            brin_ARN_propre.append(
+                brin_ARN[i:i+3]
+            )
+
+
+        code_genet = {
+
+            'AUG':'Met',
+            'UUU':'Phe',
+            'UUC':'Phe',
+            'UAA':'STOP',
+            'UAG':'STOP',
+            'UGA':'STOP'
+        }
+
+
+        proteine=[]
+
+
+        for codon in brin_ARN_propre:
+
+            if codon in code_genet:
+
+                if code_genet[codon]=="STOP":
+                    break
+
+                proteine.append(
+                    code_genet[codon]
+                )
+
+
+        st.code(
+            "Protéine correspondante :\n\n"
+            +
+            "-".join(proteine),
+            language="text"
+        )
+
+
     else:
 
-        st.error(
-            "❌ L'ordre des blocs n'est pas encore bon."
+
+        st.warning(
+            "⚠️ Ordre incorrect"
+        )
+
+
+        st.subheader(
+            "Ce que Python reçoit :"
+        )
+
+
+        st.code(
+            programme,
+            language="python"
         )
