@@ -1,112 +1,57 @@
+#version stramite sans tkinter
 import streamlit as st
-st.title("Code puzzle traduction")
 
-# ==========================================
-# Classe Bloc avec hauteur automatique
-# ==========================================
+st.set_page_config(
+    page_title="Puzzle ADN → Protéine",
+    page_icon="🧬"
+)
 
-class Bloc:
-    def __init__(self, canvas, texte, x, y):
+st.title("🧬 Puzzle ADN → Protéine")
 
-        self.canvas = canvas
-        self.texte = texte
+st.write(
+    "Replace les blocs dans le bon ordre pour reconstruire le programme."
+)
 
-        lignes = texte.count("\n") + 1
-        hauteur_ligne = 18
-        marge = 20
+# ----------------------------
+# Blocs du puzzle
+# ----------------------------
 
-        self.hauteur = lignes * hauteur_ligne + marge
-        self.largeur = 520
+blocs = {
 
-        self.rect = canvas.create_rectangle(
-            x, y, x + self.largeur, y + self.hauteur,
-            fill="lightyellow",
-            outline="black"
-        )
+"C": """# Bloc C
+brin_ADN = input("Entrez la séquence ADN : ")
+brin_ADN_propre = brin_ADN.upper()
+""",
 
-        self.text = canvas.create_text(
-            x + 10,
-            y + 10,
-            text=texte,
-            font=("Courier", 10),
-            anchor="nw",
-            width=self.largeur - 20
-        )
+"B": """# Bloc B
+brin_ARN = brin_ADN_propre.replace('T','U')
+""",
 
-        for item in (self.rect, self.text):
-            canvas.tag_bind(item, "<Button-1>", self.start_drag)
-            canvas.tag_bind(item, "<B1-Motion>", self.drag)
+"A": """# Bloc A
+j = 0
+brin_ARN_propre = []
 
-        self.last_x = 0
-        self.last_y = 0
+while j < len(brin_ARN):
+    brin_ARN_propre.append(brin_ARN[j:j+3])
+    j += 3
+""",
 
-    def start_drag(self, event):
-        self.last_x = event.x
-        self.last_y = event.y
+"D": """# Bloc D
+code_genet = {
+'AUG':'Met',
+'UUU':'Phe',
+'UUC':'Phe',
+'UAA':'STOP',
+'UAG':'STOP',
+'UGA':'STOP'
+}
+""",
 
-    def drag(self, event):
-
-        dx = event.x - self.last_x
-        dy = event.y - self.last_y
-
-        self.canvas.move(self.rect, dx, dy)
-        self.canvas.move(self.text, dx, dy)
-
-        self.last_x = event.x
-        self.last_y = event.y
-
-        # mise à jour scrollregion
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-
-    def get_y(self):
-        return self.canvas.coords(self.rect)[1]
-
-
-# ==========================================
-# Application principale
-# ==========================================
-
-class App:
-
-    def __init__(self, root):
-
-        root.title("Puzzle ADN → Protéine")
-        root.geometry("900x600")
-
-        # frame principale
-        frame = st.Frame(root)
-        frame.pack(fill="both", expand=True)
-
-        # canvas
-        self.canvas = st.Canvas(frame, bg="white")
-        self.canvas.pack(side="left", fill="both", expand=True)
-
-        # scrollbar verticale
-        scrollbar = st.Scrollbar(frame, orient="vertical", command=self.canvas.yview)
-        scrollbar.pack(side="right", fill="y")
-
-        self.canvas.configure(yscrollcommand=scrollbar.set)
-
-        # blocs mélangés (empilés verticalement)
-        y = 20
-        espace = 20
-
-        self.blocs = []
-
-        def ajouter_bloc(texte):
-            nonlocal y
-            bloc = Bloc(self.canvas, texte, 50, y)
-            self.blocs.append(bloc)
-            y += bloc.hauteur + espace
-
-        ajouter_bloc(
-'''# Bloc B
-brin_ARN = brin_ADN_propre.replace('T', 'U')''')
-
-        ajouter_bloc(
-'''# Bloc F
+"F": """# Bloc F
 def nettoyage(tab):
+
     j = 0
+
     for i in tab:
         if tab[j] == 'AUG':
             for k in range(j):
@@ -115,80 +60,132 @@ def nettoyage(tab):
         j += 1
 
     j = 0
+
     for i in tab:
         if tab[j] in ['UAA','UAG','UGA']:
-            for k in range(j, len(tab)):
+            for k in range(j,len(tab)):
                 del tab[j]
             break
         j += 1
-    return tab''')
 
-        ajouter_bloc(
-'''# Bloc C
-brin_ADN = input("Entrez la séquence ADN : ")
-brin_ADN_propre = brin_ADN.upper()''')
+    return tab
+""",
 
-        ajouter_bloc(
-'''# Bloc D
-code_genet = {
-    'AUG':'Met',
-    'UUU':'Phe','UUC':'Phe',
-    'UAA':'STOP','UAG':'STOP','UGA':'STOP'
-}''')
+"G": """# Bloc G
+resultat = nettoyage(brin_ARN_propre)
+""",
 
-        ajouter_bloc(
-'''# Bloc A
-j = 0
-brin_ARN_propre = []
-while j < len(brin_ARN):
-    brin_ARN_propre.append(brin_ARN[j:j+3])
-    j += 3''')
+"E": """# Bloc E
+proteine = []
 
-        ajouter_bloc(
-'''# Bloc G
-resultat = nettoyage(brin_ARN_propre)''')
-        
-        ajouter_bloc(
-'''# Bloc E
-print("Protéine correspondante :")
 for codon in resultat:
+
     if codon in code_genet:
-        if code_genet[codon] == "STOP":
+
+        if code_genet[codon]=="STOP":
             break
-        print(code_genet[codon], end='-')
+
+        proteine.append(code_genet[codon])
+
     else:
-        print("Erreur codon", codon)
-        break''')
+        proteine.append("Erreur")
+
+print("-".join(proteine))
+"""
+}
 
 
-        # mise à jour scrollregion initiale
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-
-        # bouton exécuter
-        bouton = st.Button(root, text="Exécuter", command=self.executer)
-        bouton.pack(pady=5)
-
-    # ==========================================
-    # exécution
-    # ==========================================
-
-    def executer(self):
-
-        blocs_tries = sorted(self.blocs, key=lambda b: b.get_y())
-
-        code = ""
-
-        for bloc in blocs_tries:
-            code += bloc.texte + "\n\n"
-
-        print("\n===== CODE EXECUTE =====\n")
-        print(code)
-
-        try:
-            exec(code)
-        except Exception as e:
-            print("Erreur :", e)
+ordre_correct = [
+"C",
+"B",
+"A",
+"D",
+"F",
+"G",
+"E"
+]
 
 
+# ----------------------------
+# Choix de l'élève
+# ----------------------------
+
+choix = st.multiselect(
+    "Choisis l'ordre des blocs :",
+    list(blocs.keys())
+)
 
 
+# affichage
+
+if choix:
+
+    st.subheader("Ton programme :")
+
+    for lettre in choix:
+        st.code(blocs[lettre], language="python")
+
+
+# ----------------------------
+# Vérification
+# ----------------------------
+
+if st.button("✅ Vérifier"):
+
+    if choix == ordre_correct:
+
+        st.success("Bravo ! Le programme est correct 🎉")
+
+    else:
+
+        st.error(
+            "Ce n'est pas encore le bon ordre. Essaie encore."
+        )
+
+
+# ----------------------------
+# Test ADN
+# ----------------------------
+
+st.divider()
+
+st.subheader("Tester la traduction")
+
+sequence = st.text_input(
+    "Séquence ADN",
+    "ATGGTTTAA"
+)
+
+
+if st.button("Traduire"):
+
+    arn = sequence.upper().replace("T","U")
+
+    codons = [
+        arn[i:i+3]
+        for i in range(0,len(arn),3)
+    ]
+
+    code = {
+        'AUG':'Met',
+        'UUU':'Phe',
+        'UUC':'Phe',
+        'UAA':'STOP',
+        'UAG':'STOP',
+        'UGA':'STOP'
+    }
+
+    proteine=[]
+
+    for c in codons:
+
+        if c in code:
+
+            if code[c]=="STOP":
+                break
+
+            proteine.append(code[c])
+
+    st.info(
+        " → ".join(proteine)
+    )
