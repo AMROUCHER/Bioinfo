@@ -11,7 +11,7 @@ st.set_page_config(
 st.title("🧬 Puzzle ADN → Protéine")
 
 st.write(
-    "Replace les blocs dans le bon ordre pour reconstruire le programme."
+    "Déplace les blocs pour reconstruire le programme."
 )
 
 
@@ -36,12 +36,9 @@ def nettoyage(tab):
     j = 0
 
     for i in tab:
-
         if tab[j] == 'AUG':
-
             for k in range(j):
                 del tab[0]
-
             break
 
         j += 1
@@ -49,9 +46,7 @@ def nettoyage(tab):
 
     j = 0
 
-
     for i in tab:
-
         if tab[j] in ['UAA','UAG','UGA']:
 
             for k in range(j, len(tab)):
@@ -60,7 +55,6 @@ def nettoyage(tab):
             break
 
         j += 1
-
 
     return tab"""
 },
@@ -78,14 +72,10 @@ brin_ADN_propre = brin_ADN.upper()"""
 {
 "id": "D",
 "code": """# Bloc D
-
 code_genet = {
-
     'AUG':'Met',
-
     'UUU':'Phe',
     'UUC':'Phe',
-
     'UAA':'STOP',
     'UAG':'STOP',
     'UGA':'STOP'
@@ -96,11 +86,9 @@ code_genet = {
 {
 "id": "A",
 "code": """# Bloc A
-
 j = 0
 
 brin_ARN_propre = []
-
 
 while j < len(brin_ARN):
 
@@ -115,7 +103,6 @@ while j < len(brin_ARN):
 {
 "id": "G",
 "code": """# Bloc G
-
 resultat = nettoyage(brin_ARN_propre)"""
 },
 
@@ -123,9 +110,7 @@ resultat = nettoyage(brin_ARN_propre)"""
 {
 "id": "E",
 "code": """# Bloc E
-
 print("Protéine correspondante :")
-
 
 for codon in resultat:
 
@@ -134,20 +119,13 @@ for codon in resultat:
         if code_genet[codon] == "STOP":
             break
 
-
         print(
             code_genet[codon],
             end='-'
         )
 
-
     else:
-
-        print(
-            "Erreur codon",
-            codon
-        )
-
+        print("Erreur codon", codon)
         break"""
 }
 
@@ -155,40 +133,54 @@ for codon in resultat:
 
 
 # =================================================
-# Zone puzzle
+# Préparation
 # =================================================
 
-st.subheader("🧩 Déplace les blocs")
-
-
-liste_depart = [
+noms = [
     "🧩 Bloc " + b["id"]
     for b in blocs
 ]
 
 
+codes = {
+    "🧩 Bloc " + b["id"]: b["code"]
+    for b in blocs
+}
+
+
+# =================================================
+# Puzzle déplacement
+# =================================================
+
+st.subheader("🧩 Replace les blocs")
+
+
 ordre = sort_items(
-    liste_depart,
+    noms,
     direction="vertical"
 )
 
 
-for element in ordre:
-    st.info(element)
+# affichage avec aperçu
 
+for bloc in ordre:
+
+    apercu = "\n".join(
+        codes[bloc].split("\n")[:3]
+    )
+
+    st.info(
+        f"{bloc}\n\n{apercu}"
+    )
 
 
 # =================================================
-# Reconstruction du code
+# Programme complet
 # =================================================
+
+st.divider()
 
 st.subheader("📜 Programme reconstruit")
-
-
-table = {
-    "🧩 Bloc " + b["id"]: b["code"]
-    for b in blocs
-}
 
 
 programme = ""
@@ -197,7 +189,7 @@ programme = ""
 for bloc in ordre:
 
     programme += "\n\n"
-    programme += table[bloc]
+    programme += codes[bloc]
 
 
 st.code(
@@ -208,23 +200,17 @@ st.code(
 
 
 # =================================================
-# Correction
+# Vérification
 # =================================================
 
 solution = [
 
     "🧩 Bloc C",
-
     "🧩 Bloc B",
-
     "🧩 Bloc A",
-
     "🧩 Bloc D",
-
     "🧩 Bloc F",
-
     "🧩 Bloc G",
-
     "🧩 Bloc E"
 
 ]
@@ -232,15 +218,14 @@ solution = [
 
 if st.button("✅ Vérifier"):
 
-
     if ordre == solution:
 
         st.success(
-            "Bravo 🎉 Le programme est correct !"
+            "🎉 Bravo ! Le programme est correct."
         )
 
     else:
 
         st.error(
-            "Il faut encore modifier l'ordre des blocs."
+            "❌ L'ordre des blocs n'est pas encore bon."
         )
