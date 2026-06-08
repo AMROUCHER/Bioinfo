@@ -1,143 +1,143 @@
 import streamlit as st
 from streamlit_sortables import sort_items
+import io
+import contextlib
 
 
 st.set_page_config(
-    page_title="Puzzle ADN → Protéine",
+    page_title="Puzzle ADN Python",
     page_icon="🧬"
 )
 
-st.title("🧬 Puzzle ADN → Protéine")
 
-st.write("Déplace les blocs pour reconstruire le programme.")
+st.title("🧬 Puzzle Python : ADN → Protéine")
+
+st.write(
+    "Déplace les blocs, reconstruis le programme puis lance-le."
+)
 
 
-# =================================================
-# BLocs
-# =================================================
+# ==================================================
+# BLOCS PYTHON
+# ==================================================
 
 blocs = [
 
 {
 "id":"C",
-"code":"""# Bloc C
-brin_ADN = st.text_input("Entrez la séquence ADN :", "ATGGTTTAA")
-brin_ADN_propre = brin_ADN.upper()"""
+"code":
+"""# Bloc C
+brin_ADN = st.text_input(
+    "Séquence ADN :"
+)
+
+brin_ADN_propre = brin_ADN.upper()
+"""
 },
+
 
 {
 "id":"B",
-"code":"""# Bloc B
-brin_ARN = brin_ADN_propre.replace('T','U')"""
+"code":
+"""# Bloc B
+brin_ARN = brin_ADN_propre.replace(
+    "T",
+    "U"
+)
+"""
 },
+
 
 {
 "id":"A",
-"code":"""# Bloc A
-j = 0
+"code":
+"""# Bloc A
 brin_ARN_propre = []
 
-while j < len(brin_ARN):
-    brin_ARN_propre.append(brin_ARN[j:j+3])
-    j += 3"""
+for i in range(0,len(brin_ARN),3):
+
+    brin_ARN_propre.append(
+        brin_ARN[i:i+3]
+    )
+"""
 },
+
 
 {
 "id":"D",
-"code":"""# Bloc D
+"code":
+"""# Bloc D
 code_genet = {
-'AUG':'Met',
-'UUU':'Phe',
-'UUC':'Phe',
-'UAA':'STOP',
-'UAG':'STOP',
-'UGA':'STOP'
-}"""
+
+"AUG":"Met",
+"UUU":"Phe",
+"UUC":"Phe",
+"UAA":"STOP"
+
+}
+"""
 },
+
 
 {
 "id":"F",
-"code":"""# Bloc F
-def nettoyage(tab):
+"code":
+"""# Bloc F
+resultat = []
 
-    j = 0
+for codon in brin_ARN_propre:
 
-    for i in tab:
-
-        if tab[j]=='AUG':
-
-            for k in range(j):
-                del tab[0]
-
-            break
-
-        j += 1
-
-
-    j = 0
-
-    for i in tab:
-
-        if tab[j] in ['UAA','UAG','UGA']:
-
-            for k in range(j,len(tab)):
-                del tab[j]
-
-            break
-
-        j += 1
-
-    return tab"""
+    if codon in code_genet:
+        resultat.append(
+            code_genet[codon]
+        )
+"""
 },
 
-{
-"id":"G",
-"code":"""# Bloc G
-resultat = nettoyage(brin_ARN_propre)"""
-},
 
 {
 "id":"E",
-"code":"""# Bloc E
-print("Protéine correspondante :")
+"code":
+"""# Bloc E
+st.write(
+"Protéine :"
+)
 
-for codon in resultat:
-
-    if codon in code_genet:
-
-        if code_genet[codon]=="STOP":
-            break
-
-        print(code_genet[codon], end='-')
-
-    else:
-        print("Erreur codon", codon)
-        break"""
+st.write(
+"-".join(resultat)
+)
+"""
 }
 
 ]
 
 
-# =================================================
-# Préparation
-# =================================================
+# ==================================================
+# PREPARATION
+# ==================================================
 
 noms = [
-    "🧩 Bloc " + b["id"]
+    "🟥 Bloc " + b["id"]
     for b in blocs
 ]
 
+
 codes = {
-    "🧩 Bloc " + b["id"]: b["code"]
-    for b in blocs
+
+"🟥 Bloc "+b["id"]: b["code"]
+
+for b in blocs
+
 }
 
 
-# =================================================
-# PUZZLE
-# =================================================
 
-st.subheader("🧩 Déplace les blocs")
+# ==================================================
+# DEPLACEMENT
+# ==================================================
+
+st.subheader("🟥 Blocs à déplacer")
+
 
 ordre = sort_items(
     noms,
@@ -149,71 +149,99 @@ for bloc in ordre:
 
     lignes = codes[bloc].split("\n")
 
-    if len(lignes) > 3:
-        apercu = "\n".join(lignes[:3]) + "\n..."
-    else:
-        apercu = "\n".join(lignes)
-
-    st.info(bloc + "\n\n" + apercu)
+    apercu = "\n".join(
+        lignes[:4]
+    )
 
 
-# =================================================
-# CODE RECONSTRUIT
-# =================================================
+    st.error(
+        bloc +
+        "\n\n" +
+        apercu
+    )
+
+
+
+# ==================================================
+# CODE FINAL
+# ==================================================
 
 st.divider()
 
 st.subheader("📜 Programme reconstruit")
 
+
 programme = ""
 
+
 for bloc in ordre:
-    programme += "\n\n" + codes[bloc]
 
-st.code(programme, language="python")
+    programme += "\n\n"
+    programme += codes[bloc]
 
 
-# =================================================
-# EXÉCUTION RÉELLE
-# =================================================
+st.code(
+    programme,
+    language="python"
+)
+
+
+
+# ==================================================
+# EXECUTION
+# ==================================================
 
 st.divider()
 
-st.subheader("🐍 Exécution du programme")
+st.subheader("▶️ Console Python")
 
-if st.button("▶️ Lancer"):
+
+if st.button("Lancer"):
+
+
+    sortie = io.StringIO()
+
 
     try:
-        exec_globals = {"st": st}
 
-        exec(programme, exec_globals)
+        with contextlib.redirect_stdout(sortie):
 
-    except Exception as e:
-
-        st.error(f"Erreur : {e}")
-
-
-# =================================================
-# VÉRIFICATION
-# =================================================
-
-solution = [
-"🧩 Bloc C",
-"🧩 Bloc B",
-"🧩 Bloc A",
-"🧩 Bloc D",
-"🧩 Bloc F",
-"🧩 Bloc G",
-"🧩 Bloc E"
-]
+            exec(
+                programme,
+                {
+                "st":st
+                }
+            )
 
 
-if st.button("✅ Vérifier"):
+        resultat = sortie.getvalue()
 
-    if ordre == solution:
 
-        st.success("🎉 Bravo ! Ordre correct.")
+        if resultat:
 
-    else:
+            st.success(
+                "Résultat :"
+            )
 
-        st.warning("❌ Ordre incorrect, essaie encore.")
+            st.code(
+                resultat
+            )
+
+        else:
+
+            st.info(
+                "Programme exécuté sans affichage texte."
+            )
+
+
+    except Exception as erreur:
+
+
+        st.error(
+            "Erreur Python :"
+        )
+
+
+        st.code(
+            str(erreur)
+        )
