@@ -13,9 +13,9 @@ st.set_page_config(
 st.title("🧬 Puzzle Python : ADN → Protéine")
 
 
-# ==========================
-# Saisie élève
-# ==========================
+# =================================================
+# Séquence ADN entrée par l'élève
+# =================================================
 
 brin_ADN = st.text_input(
     "Entre une séquence ADN :",
@@ -23,9 +23,9 @@ brin_ADN = st.text_input(
 )
 
 
-# ==========================
-# Blocs Python
-# ==========================
+# =================================================
+# Blocs Python à remettre dans l'ordre
+# =================================================
 
 blocs = [
 
@@ -35,9 +35,9 @@ blocs = [
 """# Bloc C
 
 brin_ADN_propre = brin_ADN.upper()
-
 """
 },
+
 
 {
 "id":"B",
@@ -45,12 +45,12 @@ brin_ADN_propre = brin_ADN.upper()
 """# Bloc B
 
 brin_ARN = brin_ADN_propre.replace(
-"T",
-"U"
+    "T",
+    "U"
 )
-
 """
 },
+
 
 {
 "id":"A",
@@ -59,13 +59,14 @@ brin_ARN = brin_ADN_propre.replace(
 
 brin_ARN_propre = []
 
-for i in range(0,len(brin_ARN),3):
+for i in range(0, len(brin_ARN), 3):
 
     brin_ARN_propre.append(
         brin_ARN[i:i+3]
     )
 """
 },
+
 
 {
 "id":"D",
@@ -74,14 +75,16 @@ for i in range(0,len(brin_ARN),3):
 
 code_genet = {
 
-"AUG":"Met",
-"UUU":"Phe",
-"UUC":"Phe",
-"UAA":"STOP"
+    "AUG":"Met",
+    "UUU":"Phe",
+    "UUC":"Phe",
+    "UAA":"STOP",
+    "UAG":"STOP"
 
 }
 """
 },
+
 
 {
 "id":"F",
@@ -89,6 +92,7 @@ code_genet = {
 """# Bloc F
 
 resultat = []
+
 
 for codon in brin_ARN_propre:
 
@@ -103,17 +107,16 @@ for codon in brin_ARN_propre:
 """
 },
 
+
 {
 "id":"E",
 "code":
 """# Bloc E
 
-print(
-"Protéine :"
-)
+print("Protéine :")
 
 print(
-"-".join(resultat)
+    "-".join(resultat)
 )
 """
 }
@@ -121,26 +124,26 @@ print(
 ]
 
 
-# ==========================
-# Préparation
-# ==========================
+# =================================================
+# Préparation des blocs
+# =================================================
 
 noms = [
-"🟥 Bloc "+b["id"]
-for b in blocs
+    "🟥 Bloc " + b["id"]
+    for b in blocs
 ]
 
 
 codes = {
-"🟥 Bloc "+b["id"]:b["code"]
-for b in blocs
+    "🟥 Bloc " + b["id"]: b["code"]
+    for b in blocs
 }
 
 
 
-# ==========================
-# Puzzle
-# ==========================
+# =================================================
+# Déplacement
+# =================================================
 
 st.subheader("🟥 Déplace les blocs")
 
@@ -151,27 +154,14 @@ ordre = sort_items(
 )
 
 
-for bloc in ordre:
 
-    lignes = codes[bloc].split("\n")
-
-    apercu = "\n".join(
-        lignes[:4]
-    )
-
-    st.error(
-        bloc+"\n\n"+apercu
-    )
-
-
-
-# ==========================
-# Code final
-# ==========================
+# =================================================
+# Code reconstruit
+# =================================================
 
 st.divider()
 
-st.subheader("📜 Code reconstruit")
+st.subheader("📜 Code Python reconstruit")
 
 
 programme = ""
@@ -179,7 +169,7 @@ programme = ""
 
 for bloc in ordre:
 
-    programme += "\n"
+    programme += "\n\n"
     programme += codes[bloc]
 
 
@@ -190,18 +180,20 @@ st.code(
 
 
 
-# ==========================
-# Execution
-# ==========================
+# =================================================
+# Exécution
+# =================================================
 
 st.divider()
 
 st.subheader("▶️ Console Python")
 
 
-if st.button("Lancer"):
+if st.button("Lancer le programme"):
+
 
     sortie = io.StringIO()
+
 
     try:
 
@@ -210,28 +202,39 @@ if st.button("Lancer"):
             exec(
                 programme,
                 {
-                "brin_ADN":brin_ADN,
-                "st":st
+                    "brin_ADN": brin_ADN
                 }
             )
 
 
-        texte = sortie.getvalue()
+        resultat = sortie.getvalue()
 
 
-        st.success("Programme terminé")
+        if resultat:
 
-        st.code(
-            texte,
-            language="text"
+            st.success("Résultat Python :")
+
+            st.code(
+                resultat,
+                language="text"
+            )
+
+        else:
+
+            st.info(
+                "Le programme s'est exécuté sans afficher de résultat."
+            )
+
+
+    except Exception as erreur:
+
+
+        st.error(
+            "Erreur Python :"
         )
 
 
-    except Exception as e:
-
-        st.error("Erreur Python")
-
         st.code(
-            str(e),
+            str(erreur),
             language="text"
         )
