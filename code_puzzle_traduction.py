@@ -12,14 +12,20 @@ st.set_page_config(
 
 st.title("🧬 Puzzle Python : ADN → Protéine")
 
-st.write(
-    "Déplace les blocs, reconstruis le programme puis lance-le."
+
+# ==========================
+# Saisie élève
+# ==========================
+
+brin_ADN = st.text_input(
+    "Entre une séquence ADN :",
+    "ATGGTTTAA"
 )
 
 
-# ==================================================
-# BLOCS PYTHON
-# ==================================================
+# ==========================
+# Blocs Python
+# ==========================
 
 blocs = [
 
@@ -27,31 +33,30 @@ blocs = [
 "id":"C",
 "code":
 """# Bloc C
-brin_ADN = st.text_input(
-    "Séquence ADN :"
-)
 
 brin_ADN_propre = brin_ADN.upper()
+
 """
 },
-
 
 {
 "id":"B",
 "code":
 """# Bloc B
+
 brin_ARN = brin_ADN_propre.replace(
-    "T",
-    "U"
+"T",
+"U"
 )
+
 """
 },
-
 
 {
 "id":"A",
 "code":
 """# Bloc A
+
 brin_ARN_propre = []
 
 for i in range(0,len(brin_ARN),3):
@@ -62,11 +67,11 @@ for i in range(0,len(brin_ARN),3):
 """
 },
 
-
 {
 "id":"D",
 "code":
 """# Bloc D
+
 code_genet = {
 
 "AUG":"Met",
@@ -78,32 +83,36 @@ code_genet = {
 """
 },
 
-
 {
 "id":"F",
 "code":
 """# Bloc F
+
 resultat = []
 
 for codon in brin_ARN_propre:
 
     if codon in code_genet:
+
+        if code_genet[codon]=="STOP":
+            break
+
         resultat.append(
             code_genet[codon]
         )
 """
 },
 
-
 {
 "id":"E",
 "code":
 """# Bloc E
-st.write(
+
+print(
 "Protéine :"
 )
 
-st.write(
+print(
 "-".join(resultat)
 )
 """
@@ -112,31 +121,28 @@ st.write(
 ]
 
 
-# ==================================================
-# PREPARATION
-# ==================================================
+# ==========================
+# Préparation
+# ==========================
 
 noms = [
-    "🟥 Bloc " + b["id"]
-    for b in blocs
+"🟥 Bloc "+b["id"]
+for b in blocs
 ]
 
 
 codes = {
-
-"🟥 Bloc "+b["id"]: b["code"]
-
+"🟥 Bloc "+b["id"]:b["code"]
 for b in blocs
-
 }
 
 
 
-# ==================================================
-# DEPLACEMENT
-# ==================================================
+# ==========================
+# Puzzle
+# ==========================
 
-st.subheader("🟥 Blocs à déplacer")
+st.subheader("🟥 Déplace les blocs")
 
 
 ordre = sort_items(
@@ -153,22 +159,19 @@ for bloc in ordre:
         lignes[:4]
     )
 
-
     st.error(
-        bloc +
-        "\n\n" +
-        apercu
+        bloc+"\n\n"+apercu
     )
 
 
 
-# ==================================================
-# CODE FINAL
-# ==================================================
+# ==========================
+# Code final
+# ==========================
 
 st.divider()
 
-st.subheader("📜 Programme reconstruit")
+st.subheader("📜 Code reconstruit")
 
 
 programme = ""
@@ -176,7 +179,7 @@ programme = ""
 
 for bloc in ordre:
 
-    programme += "\n\n"
+    programme += "\n"
     programme += codes[bloc]
 
 
@@ -187,9 +190,9 @@ st.code(
 
 
 
-# ==================================================
-# EXECUTION
-# ==================================================
+# ==========================
+# Execution
+# ==========================
 
 st.divider()
 
@@ -198,9 +201,7 @@ st.subheader("▶️ Console Python")
 
 if st.button("Lancer"):
 
-
     sortie = io.StringIO()
-
 
     try:
 
@@ -209,39 +210,28 @@ if st.button("Lancer"):
             exec(
                 programme,
                 {
+                "brin_ADN":brin_ADN,
                 "st":st
                 }
             )
 
 
-        resultat = sortie.getvalue()
+        texte = sortie.getvalue()
 
 
-        if resultat:
+        st.success("Programme terminé")
 
-            st.success(
-                "Résultat :"
-            )
-
-            st.code(
-                resultat
-            )
-
-        else:
-
-            st.info(
-                "Programme exécuté sans affichage texte."
-            )
-
-
-    except Exception as erreur:
-
-
-        st.error(
-            "Erreur Python :"
+        st.code(
+            texte,
+            language="text"
         )
 
 
+    except Exception as e:
+
+        st.error("Erreur Python")
+
         st.code(
-            str(erreur)
+            str(e),
+            language="text"
         )
